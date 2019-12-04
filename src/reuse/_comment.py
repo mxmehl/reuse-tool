@@ -89,8 +89,8 @@ class CommentStyle:
                 f"{cls} cannot create multi-line comments"
             )
         text = text.strip("\n")
-        result = []
-        result.append(cls.MULTI_LINE[0])
+        lines = []
+        lines.append(cls.MULTI_LINE[0])
         for line in text.splitlines():
             if cls.MULTI_LINE[2] in text:
                 raise CommentCreateError(
@@ -101,9 +101,9 @@ class CommentStyle:
                 line_result += cls.INDENT_BEFORE_MIDDLE + cls.MULTI_LINE[1]
             if line:
                 line_result += cls.INDENT_AFTER_MIDDLE + line
-            result.append(line_result)
-        result.append(cls.INDENT_BEFORE_END + cls.MULTI_LINE[2])
-        return "\n".join(result)
+            lines.append(line_result)
+        lines.append(cls.INDENT_BEFORE_END + cls.MULTI_LINE[2])
+        return "\n".join(lines)
 
     @classmethod
     def parse_comment(cls, text: str) -> str:
@@ -128,7 +128,7 @@ class CommentStyle:
         if not cls.can_handle_single():
             raise CommentParseError(f"{cls} cannot parse single-line comments")
         text = text.strip("\n")
-        result = []
+        lines = []
 
         for line in text.splitlines():
             if not line.startswith(cls.SINGLE_LINE):
@@ -136,8 +136,8 @@ class CommentStyle:
                     f"'{line}' does not start with a comment marker"
                 )
             line = line.lstrip(cls.SINGLE_LINE)
-            result.append(line)
-        result = "\n".join(result)
+            lines.append(line)
+        result = "\n".join(lines)
         return dedent(result)
 
     @classmethod
@@ -151,13 +151,13 @@ class CommentStyle:
             raise CommentParseError(f"{cls} cannot parse multi-line comments")
 
         text = text.strip("\n")
-        result = []
+        lines: List[str] = []
         try:
-            first, *lines, last = text.splitlines()
+            first, *content_lines, last = text.splitlines()
             last_is_first = False
         except ValueError:
             first = text
-            lines = []
+            content_lines: List[str] = []
             last = None  # Set this later.
             last_is_first = True
 
@@ -168,7 +168,7 @@ class CommentStyle:
         first = first.lstrip(cls.MULTI_LINE[0])
         first = first.strip()
 
-        for line in lines:
+        for line in content_lines:
             if cls.MULTI_LINE[1]:
                 possible_line = line.lstrip(cls.INDENT_BEFORE_MIDDLE)
                 prefix = cls.MULTI_LINE[1]
@@ -178,7 +178,7 @@ class CommentStyle:
                     _LOGGER.debug(
                         "'%s' does not contain a middle comment marker", line
                     )
-            result.append(line)
+            lines.append(line)
 
         if last_is_first:
             last = first
@@ -194,7 +194,7 @@ class CommentStyle:
             last = last.lstrip(cls.MULTI_LINE[1])
             last = last.lstrip()
 
-        result = "\n".join(result)
+        result = "\n".join(lines)
         result = dedent(result)
 
         if result:
@@ -452,7 +452,7 @@ NAME_STYLE_MAP = {
 
 def _all_style_classes() -> List[CommentStyle]:
     """Return a list of all defined style classes, excluding the base class."""
-    result = []
+    result: List[CommentStyle] = []
     for key, value in globals().items():
         if key.endswith("CommentStyle") and key != "CommentStyle":
             result.append(value)
