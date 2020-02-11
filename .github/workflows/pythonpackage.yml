@@ -22,4 +22,3 @@ jobs:
     - name: Run Docker image against source
       run: |
         docker run -v "$GITHUB_WORKSPACE:/data" reuse /bin/sh -c "pwd; ls -l"
-
