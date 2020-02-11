@@ -17,4 +17,4 @@ jobs:
         docker build -t reuse .
     - name: Run Docker image against source
       run: |
-        docker run -v "$GITHUB_WORKSPACE:/data" reuse
+        docker run -v "$(pwd):/data" reuse
