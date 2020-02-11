@@ -15,10 +15,6 @@ jobs:
     - name: Build Dockerfile
       run: |
         docker build -t reuse .
-    - name: test dir
-      run: ls -la
-    - name: test dir2
-      run: pwd
     - name: Run Docker image against source
       run: |
-        docker run -v "$GITHUB_WORKSPACE:/data" reuse /bin/sh -c "pwd; ls -l"
+        docker run -v "$GITHUB_WORKSPACE:/data" reuse
